@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;700&display=swap');
+
+    :root {
+      --cyan: #00f0ff;
+      --pink: #ff007f;
+      --yellow: #ffe600;
+      --dark-bg: #070510;
+      --panel-bg: rgba(14, 11, 29, 0.9);
+    }
+
+    body {
+      background: radial-gradient(circle at center, #150f2d 0%, #070510 100%);
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      padding: 10px;
+      user-select: none;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .header-container {
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      background: linear-gradient(90deg, var(--cyan), var(--pink), var(--yellow));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.4));
+    }
+
+    .author-bar {
+      background: var(--panel-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 0, 127, 0.4);
+      box-shadow: 0 0 15px rgba(255, 0, 127, 0.2);
+      padding: 4px 15px;
+      border-radius: 30px;
+      font-size: 0.75rem;
+      color: #ffb8d9;
+      margin-top: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .author-bar span {
+      color: #fff;
+      font-weight: 700;
+      font-family: 'Orbitron', sans-serif;
+      text-shadow: 0 0 6px var(--pink);
+    }
+
+    #arcade-cabinet {
+      position: relative;
+      border: 3px solid var(--cyan);
+      border-radius: 14px;
+      box-shadow: 0 0 35px rgba(0, 240, 255, 0.3), 
+                  0 0 70px rgba(255, 0, 127, 0.15),
+                  inset 0 0 20px rgba(0, 0, 0, 0.9);
+      overflow: hidden;
+      background: #000;
+      width: 400px;
+      height: 520px;
+    }
+
+    #arcade-cabinet::after {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+      background-size: 100% 4px;
+      z-index: 5;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(7, 5, 16, 0.95);
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      transition: opacity 0.3s ease;
+      padding: 15px;
+      box-sizing: border-box;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .screen h2 {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--yellow);
+      margin-bottom: 12px;
+      font-size: 1.3rem;
+      text-shadow: 0 0 10px rgba(255, 230, 0, 0.6);
+      letter-spacing: 1px;
+    }
+
+    .mode-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+      max-height: 320px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    .mode-card {
+      background: linear-gradient(135deg, rgba(255, 0, 127, 0.15), rgba(0, 240, 255, 0.15));
+      border: 1px solid rgba(0, 240, 255, 0.4);
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .mode-card:hover {
+      border-color: var(--cyan);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+      background: linear-gradient(135deg, rgba(255, 0, 127, 0.3), rgba(0, 240, 255, 0.3));
+    }
+
+    .mode-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .mode-desc {
+      font-size: 0.75rem;
+      color: #b8b6cc;
+      margin-top: 2px;
+    }
+
+    .btn-cyber {
+      background: linear-gradient(45deg, var(--pink), #7928ca);
+      border: 2px solid #ff85c0;
+      color: white;
+      padding: 8px 20px;
+      margin-top: 8px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(255, 0, 127, 0.5);
+      transition: all 0.2s ease;
+      letter-spacing: 1px;
+    }
+
+    .btn-cyber:hover {
+      transform: scale(1.04);
+      box-shadow: 0 0 20px var(--pink);
+    }
+
+    .instructions-box {
+      font-size: 0.8rem;
+      color: #ccc;
+      text-align: left;
+      background: rgba(0, 240, 255, 0.05);
+      border-left: 3px solid var(--cyan);
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      width: 90%;
+      border-radius: 0 6px 6px 0;
+    }
+
+    .instructions-box ul {
+      margin: 4px 0 0 15px;
+      padding: 0;
+    }
+
+    #touch-controls {
+      display: flex;
+      justify-content: space-between;
+      width: 400px;
+      margin-top: 8px;
+      padding: 0 5px;
+      box-sizing: border-box;
+    }
+
+    .touch-btn {
+      background: rgba(0, 240, 255, 0.15);
+      border: 2px solid var(--cyan);
+      color: var(--cyan);
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 1.1rem;
+      padding: 12px 24px;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+      touch-action: manipulation;
+    }
+
+    .touch-btn:active {
+      background: var(--cyan);
+      color: #000;
+    }
+
+    .touch-nitro {
+      background: rgba(255, 230, 0, 0.15);
+      border-color: var(--yellow);
+      color: var(--yellow);
+    }
+    .touch-nitro:active {
+      background: var(--yellow);
+      color: #000;
+    }
+
+    .settings-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 90%;
+      margin: 6px 0;
+      font-size: 0.85rem;
+    }
+
+    .settings-row select {
+      background: #111;
+      border: 1px solid var(--cyan);
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-container">
+    <h1>⚡ CYBER MOTO XTREME ⚡</h1>
+    <div class="author-bar">
+      CREADORES: <span>Tomas Alejandro Hernandez Arciniegas</span> & <span>Samuel Calderón</span>
+    </div>
+  </div>
+
+  <div id="arcade-cabinet">
+    <canvas id="gameCanvas" width="400" height="520"></canvas>
+
+    <div id="mainMenu" class="screen">
+      <h2>// SELECCIONAR MODO</h2>
+      <div class="instructions-box">
+        <b>¿Cómo se juega?</b>
+        <ul>
+          <li>Esquiva el tráfico en la autopista.</li>
+          <li>Usa <span id="keyLeftHint">←</span> <span id="keyRightHint">→</span> o los botones táctiles.</li>
+          <li>En Modo Nitro, mantén presionado ESPACIO para destruir autos.</li>
+        </ul>
+      </div>
+      <div class="mode-cards">
+        <div class="mode-card" onclick="startGame('classic')">
+          <span class="mode-title">🔥 MODO CLÁSICO</span>
+          <span class="mode-desc">Supervivencia estándar con velocidad progresiva.</span>
+        </div>
+        <div class="mode-card" onclick="startGame('nitro')">
+          <span class="mode-title">⚡ MODO NITRO (TURBO)</span>
+          <span class="mode-desc">Propulsor activo para arrasar con los obstáculos.</span>
+        </div>
+        <div class="mode-card" onclick="startGame('timeattack')">
+          <span class="mode-title">⏱️ CONTRARRELOJ</span>
+          <span class="mode-desc">45 segundos para lograr la puntuación más alta.</span>
+        </div>
+        <div class="mode-card" onclick="startGame('survival')">
+          <span class="mode-title">🛡️ SUPERVIVENCIA (3 VIDAS)</span>
+          <span class="mode-desc">Tienes 3 oportunidades antes de colapsar.</span>
+        </div>
+      </div>
+      <button class="btn-cyber" onclick="openSettings()" style="margin-top: 10px;">⚙️ CONFIGURACIÓN</button>
+    </div>
+
+    <div id="settingsScreen" class="screen hidden">
+      <h2>// CONFIGURACIÓN</h2>
+      <div class="settings-row">
+        <span>Control Izquierda:</span>
+        <select id="configLeft">
+          <option value="ArrowLeft">Flecha Izquierda</option>
+          <option value="a">Tecla A</option>
+          <option value="j">Tecla J</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <span>Control Derecha:</span>
+        <select id="configRight">
+          <option value="ArrowRight">Flecha Derecha</option>
+          <option value="d">Tecla D</option>
+          <option value="l">Tecla L</option>
+        </select>
+      </div>
+      <button class="btn-cyber" onclick="saveSettings()">💾 GUARDAR Y VOLVER</button>
+    </div>
+
+    <div id="gameOverScreen" class="screen hidden">
+      <h2 style="color: var(--pink); text-shadow: 0 0 12px var(--pink);">SISTEMA COLAPSADO</h2>
+      <p id="finalScore" style="font-family: 'Orbitron', sans-serif; font-size: 1rem; color: #fff; margin-bottom: 15px;">PUNTAJE: 0</p>
+      <button class="btn-cyber" onclick="returnToMenu()">🏠 MENÚ PRINCIPAL</button>
+      <button class="btn-cyber" onclick="restartGame()" style="background: linear-gradient(45deg, var(--cyan), #0055ff); border-color: #80c4ff;">🔄 REINTENTAR</button>
+    </div>
+  </div>
+
+  <div id="touch-controls">
+    <button class="touch-btn" id="btnLeft">◄ IZQ</button>
+    <button class="touch-btn touch-nitro" id="btnNitro">⚡ NITRO</button>
+    <button class="touch-btn" id="btnRight">DER ►</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let currentMode = 'classic';
+    let gameRunning = false;
+    let score = 0;
+    let speed = 4;
+    let baseSpeed = 4;
+    let lineOffset = 0;
+    let gameTime = 45;
+    let lives = 3;
+    let timerInterval = null;
+    let invulnerableTimer = 0;
+
+    let keyLeft = 'ArrowLeft';
+    let keyRight = 'ArrowRight';
+
+    const player = {
+      x: canvas.width / 2 - 16,
+      y: canvas.height - 85,
+      width: 32,
+      height: 60,
+      color: "#00f0ff",
+      dx: 0,
+      speed: 5.5,
+      nitroActive: false,
+      nitroFuel: 100
+    };
+
+    const obstacles = [];
+    const obstacleColors = ["#ff007f", "#ffe600", "#00ff66", "#bd00ff"];
+
+    const keys = {};
+    window.addEventListener('keydown', (e) => {
+      if (e.key === keyLeft || e.key === 'a' || e.key === 'A') keys['left'] = true;
+      if (e.key === keyRight || e.key === 'd' || e.key === 'D') keys['right'] = true;
+      if (e.key === ' ' && (currentMode === 'nitro' || player.nitroFuel > 10)) {
+        player.nitroActive = true;
+      }
+    });
+    window.addEventListener('keyup', (e) => {
+      if (e.key === keyLeft || e.key === 'a' || e.key === 'A') keys['left'] = false;
+      if (e.key === keyRight || e.key === 'd' || e.key === 'D') keys['right'] = false;
+      if (e.key === ' ') player.nitroActive = false;
+    });
+
+    const setupTouchButton = (id, actionName) => {
+      const btn = document.getElementById(id);
+      btn.addEventListener('touchstart', (e) => { e.preventDefault(); keys[actionName] = true; });
+      btn.addEventListener('touchend', (e) => { e.preventDefault(); keys[actionName] = false; });
+      btn.addEventListener('mousedown', () => { keys[actionName] = true; });
+      btn.addEventListener('mouseup', () => { keys[actionName] = false; });
+    };
+    setupTouchButton('btnLeft', 'left');
+    setupTouchButton('btnRight', 'right');
+    
+    const nitroBtn = document.getElementById('btnNitro');
+    nitroBtn.addEventListener('touchstart', (e) => { e.preventDefault(); player.nitroActive = true; });
+    nitroBtn.addEventListener('touchend', (e) => { e.preventDefault(); player.nitroActive = false; });
+    nitroBtn.addEventListener('mousedown', () => { player.nitroActive = true; });
+    nitroBtn.addEventListener('mouseup', () => { player.nitroActive = false; });
+
+    function openSettings() {
+      document.getElementById('mainMenu').classList.add('hidden');
+      document.getElementById('settingsScreen').classList.remove('hidden');
+    }
+
+    function saveSettings() {
+      keyLeft = document.getElementById('configLeft').value;
+      keyRight = document.getElementById('configRight').value;
+      document.getElementById('keyLeftHint').innerText = keyLeft === 'ArrowLeft' ? '←' : keyLeft.toUpperCase();
+      document.getElementById('keyRightHint').innerText = keyRight === 'ArrowRight' ? '→' : keyRight.toUpperCase();
+      document.getElementById('settingsScreen').classList.add('hidden');
+      document.getElementById('mainMenu').classList.remove('hidden');
+    }
+
+    function startGame(mode) {
+      currentMode = mode;
+      document.getElementById('mainMenu').classList.add('hidden');
+      document.getElementById('gameOverScreen').classList.add('hidden');
+      
+      score = 0;
+      obstacles.length = 0;
+      player.x = canvas.width / 2 - 16;
+      player.nitroFuel = 100;
+      player.nitroActive = false;
+      lives = mode === 'survival' ? 3 : 1;
+      invulnerableTimer = 0;
+
+      if (mode === 'classic' || mode === 'survival') {
+        baseSpeed = 4;
+        speed = 4;
+      } else if (mode === 'nitro') {
+        baseSpeed = 4.8;
+        speed = 4.8;
+      } else if (mode === 'timeattack') {
+        baseSpeed = 5.5;
+        speed = 5.5;
+        gameTime = 45;
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+          if (gameRunning) {
+            gameTime--;
+            if (gameTime <= 0) endGame();
+          }
+        }, 1000);
+      }
+
+      gameRunning = true;
+      requestAnimationFrame(gameLoop);
+    }
+
+    function returnToMenu() {
+      gameRunning = false;
+      if (timerInterval) clearInterval(timerInterval);
+      document.getElementById('gameOverScreen').classList.add('hidden');
+      document.getElementById('mainMenu').classList.remove('hidden');
+    }
+
+    function restartGame() {
+      startGame(currentMode);
+    }
+
+    function endGame() {
+      gameRunning = false;
+      if (timerInterval) clearInterval(timerInterval);
+      document.getElementById('finalScore').innerText = "PUNTAJE FINAL: " + Math.floor(score);
+      document.getElementById('gameOverScreen').classList.remove('hidden');
+    }
+
+    function createObstacle() {
+      const laneWidth = (canvas.width - 40) / 3;
+      const lane = Math.floor(Math.random() * 3);
+      const x = 20 + lane * laneWidth + (laneWidth / 2) - 16;
+      const color = obstacleColors[Math.floor(Math.random() * obstacleColors.length)];
+      
+      obstacles.push({
+        x: x,
+        y: -80,
+        width: 32,
+        height: 60,
+        color: color
+      });
+    }
+
+    function drawRoad() {
+      ctx.fillStyle = "#0c091a";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.strokeStyle = currentMode === 'nitro' ? "#ffe600" : "#ff007f";
+      ctx.lineWidth = 5;
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = ctx.strokeStyle;
+      ctx.strokeRect(10, 0, canvas.width - 20, canvas.height);
+      ctx.shadowBlur = 0;
+
+      ctx.strokeStyle = "#00f0ff";
+      ctx.lineWidth = 3;
+      ctx.setLineDash([25, 20]);
+      ctx.lineDashOffset = -lineOffset;
+
+      let laneW = (canvas.width - 20) / 3;
+      ctx.beginPath();
+      ctx.moveTo(10 + laneW, 0);
+      ctx.lineTo(10 + laneW, canvas.height);
+      ctx.moveTo(10 + laneW * 2, 0);
+      ctx.lineTo(10 + laneW * 2, canvas.height);
+      ctx.stroke();
+
+      ctx.setLineDash([]);
+      lineOffset += speed;
+    }
+
+    function drawMoto(x, y, w, h, color, isPlayer = false, isNitro = false) {
+      if (isPlayer && invulnerableTimer > 0 && Math.floor(invulnerableTimer / 4) % 2 === 0) return;
+
+      ctx.shadowBlur = isNitro ? 25 : 12;
+      ctx.shadowColor = isNitro ? "#ffe600" : color;
+
+      ctx.fillStyle = isNitro ? "#fff" : color;
+      ctx.fillRect(x + 6, y + 8, w - 12, h - 16);
+
+      ctx.fillStyle = "#0a0a0a";
+      ctx.fillRect(x + 4, y + 6, 8, 12);
+      ctx.fillRect(x + w - 12, y + 6, 8, 12);
+      ctx.fillRect(x + 4, y + h - 18, 8, 12);
+      ctx.fillRect(x + w - 12, y + h - 18, 8, 12);
+
+      ctx.fillStyle = isPlayer ? "#00f0ff" : "#ff0033";
+      ctx.fillRect(x + 10, isPlayer ? y + 6 : y + h - 10, w - 20, 4);
+
+      ctx.shadowBlur = 0;
+    }
+
+    function gameLoop() {
+      if (!gameRunning) return;
+
+      if (keys['left']) {
+        player.dx = -player.speed;
+      } else if (keys['right']) {
+        player.dx = player.speed;
+      } else {
+        player.dx = 0;
+      }
+
+      if (player.nitroActive && player.nitroFuel > 0) {
+        speed = baseSpeed * 2.2;
+        player.nitroFuel -= 0.8;
+      } else {
+        speed = baseSpeed + (score / 400);
+        if (player.nitroFuel < 100) player.nitroFuel += 0.2;
+      }
+
+      player.x += player.dx;
+      if (player.x < 15) player.x = 15;
+      if (player.x + player.width > canvas.width - 15) player.x = canvas.width - 15 - player.width;
+
+      if (invulnerableTimer > 0) invulnerableTimer--;
+
+      drawRoad();
+
+      let spawnRate = currentMode === 'nitro' ? 0.035 : 0.022;
+      if (Math.random() < spawnRate) {
+        if (obstacles.length === 0 || obstacles[obstacles.length - 1].y > 140) {
+          createObstacle();
+        }
+      }
+
+      for (let i = 0; i < obstacles.length; i++) {
+        let obs = obstacles[i];
+        obs.y += speed;
+
+        drawMoto(obs.x, obs.y, obs.width, obs.height, obs.color);
+
+        if (
+          player.x < obs.x + obs.width &&
+          player.x + player.width > obs.x &&
+          player.y < obs.y + obs.height &&
+          player.y + player.height > obs.y
+        ) {
+          if (player.nitroActive) {
+            obstacles.splice(i, 1);
+            i--;
+            score += 50;
+            continue;
+          } else if (invulnerableTimer === 0) {
+            if (lives > 1) {
+              lives--;
+              invulnerableTimer = 60;
+              obstacles.splice(i, 1);
+              i--;
+            } else {
+              endGame();
+              return;
+            }
+          }
+        }
+
+        if (obs.y > canvas.height) {
+          obstacles.splice(i, 1);
+          i--;
+          score += 10;
+        }
+      }
+
+      drawMoto(player.x, player.y, player.width, player.height, player.color, true, player.nitroActive);
+
+      ctx.fillStyle = "rgba(10, 7, 25, 0.8)";
+      ctx.fillRect(0, 0, canvas.width, 35);
+      ctx.strokeStyle = "rgba(0, 240, 255, 0.4)";
+      ctx.strokeRect(0, 0, canvas.width, 35);
+
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 12px 'Orbitron', sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText("PTS: " + Math.floor(score), 15, 22);
+
+      if (currentMode === 'timeattack') {
+        ctx.fillStyle = gameTime <= 10 ? "#ff0055" : "#ffe600";
+        ctx.textAlign = "right";
+        ctx.fillText("TIME: " + gameTime + "s", canvas.width - 15, 22);
+      } else if (currentMode === 'survival') {
+        ctx.fillStyle = "#ff007f";
+        ctx.textAlign = "right";
+        ctx.fillText("VIDAS: " + "❤️".repeat(lives), canvas.width - 15, 22);
+      } else {
+        ctx.fillStyle = "#ffe600";
+        ctx.textAlign = "right";
+        ctx.fillText("NITRO: " + Math.floor(player.nitroFuel) + "%", canvas.width - 15, 22);
+      }
+
+      score += 0.08;
+      requestAnimationFrame(gameLoop);
+    }
+  </script>
+</body>
+</html>
